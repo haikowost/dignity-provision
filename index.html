@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dignity Provision | 3CI Community</title>
-    <!-- Framework CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -14,14 +13,13 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-        // --- Firebase Modular SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICONS (SVG Implementation for Maximum Stability) ---
+        // --- ICONS (SVG Implementation for Reliability) ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
                 Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
@@ -52,32 +50,21 @@
         );
 
         // --- FIREBASE CONFIGURATION ---
-        let firebaseConfig;
-        try {
-            firebaseConfig = JSON.parse(__firebase_config);
-        } catch (e) {
-            firebaseConfig = {
-                apiKey: "AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
-                authDomain: "friendof3ci-dignity-provision.firebaseapp.com",
-                projectId: "friendof3ci-dignity-provision",
-                storageBucket: "friendof3ci-dignity-provision.appspot.com",
-                messagingSenderId: "251880622781",
-                appId: "1:251880622781:web:0bde3a9b9a78cf5f3385d4"
-            };
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
+            authDomain: "friendof3ci-dignity-provision.firebaseapp.com",
+            projectId: "friendof3ci-dignity-provision",
+            storageBucket: "friendof3ci-dignity-provision.appspot.com",
+            messagingSenderId: "251880622781",
+            appId: "1:251880622781:web:0bde3a9b9a78cf5f3385d4"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // CRITICAL PATH SANITIZATION: Flatten the appId to avoid segment errors
-        const rawAppId = typeof __app_id !== 'undefined' ? __app_id : "friendof3ci-dignity-provision"; 
-        const appId = rawAppId.replace(/[\/\.]/g, '_');
-        
+        const appId = "friendof3ci-dignity-provision"; 
         const ACCESS_CODE = "3Ci";
-        const TESTIMONIAL_EXPIRY_DAYS = 30;
 
-        // Path Helper following RULE 1: /artifacts/{appId}/public/data/{collection}
         const getDataCollection = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
 
         function App() {
@@ -87,24 +74,12 @@
           const [activeTab, setActiveTab] = useState('home'); 
           const [candidates, setCandidates] = useState([]);
           const [loading, setLoading] = useState(true);
-          const [isAdmin, setIsAdmin] = useState(false);
 
           useEffect(() => {
-            const initAuth = async () => {
-                try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (err) { console.error("Auth Error:", err); }
-            };
-            initAuth();
+            signInAnonymously(auth);
             const unsubscribe = onAuthStateChanged(auth, (u) => {
               if (u) {
                 setUser(u);
-                // Unified access logic: enter the code, see all tabs.
-                setIsAdmin(true); 
                 setLoading(false);
               }
             });
@@ -115,7 +90,7 @@
             if (!user || !authorized) return;
             const unsub = onSnapshot(getDataCollection('candidates'), (snapshot) => {
               setCandidates(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            }, (error) => console.error("Firestore Sync Error:", error));
+            });
             return () => unsub();
           }, [user, authorized]);
 
@@ -125,19 +100,19 @@
             else alert("Incorrect Access Code.");
           };
 
-          if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+          if (loading) return <div className="min-h-screen flex items-center justify-center bg-indigo-900"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div></div>;
 
           if (!authorized) {
             return (
                 <div className="min-h-screen bg-indigo-900 flex items-center justify-center p-6 text-white">
-                    <div className="max-w-md w-full text-center space-y-8">
-                        <div className="bg-white/10 p-8 rounded-[2.5rem] backdrop-blur-md border border-white/20 shadow-2xl animate-in fade-in zoom-in duration-500">
+                    <div className="max-w-md w-full text-center space-y-8 animate-in fade-in duration-700">
+                        <div className="bg-white/10 p-8 rounded-[2.5rem] backdrop-blur-md border border-white/20 shadow-2xl">
                             <div className="bg-white text-indigo-900 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6"><Icon name="Lock" size={32} /></div>
-                            <h1 className="text-3xl font-black mb-2 leading-none uppercase tracking-tighter">3CI Community</h1>
+                            <h1 className="text-3xl font-black mb-2 tracking-tighter">3CI COMMUNITY</h1>
                             <p className="text-indigo-200 text-sm mb-8 font-medium italic">"Dignity Through Provision"</p>
                             <form onSubmit={handleAccess} className="space-y-4">
-                                <input type="password" placeholder="Access Code" className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold outline-none focus:bg-white/20 transition-all placeholder:text-white/40" value={accessInput} onChange={(e) => setAccessInput(e.target.value)} />
-                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl">Enter Provision</button>
+                                <input type="password" placeholder="Access Code" className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold outline-none focus:bg-white/20 transition-all placeholder:text-white/30" value={accessInput} onChange={(e) => setAccessInput(e.target.value)} />
+                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl">Unlock Access</button>
                             </form>
                         </div>
                     </div>
@@ -154,7 +129,7 @@
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">3CI Men's Group</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full transition-all ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`} title="Moderation Hub"><Icon name="Settings" size={18} /></button>
+                    <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full transition-all ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}><Icon name="Settings" size={18} /></button>
                     <div className="bg-indigo-50 p-2 rounded-full"><Icon name="Shield" size={18} className="text-indigo-600" /></div>
                   </div>
                 </div>
@@ -180,19 +155,19 @@
 
         function HomeView({ candidates, onNavigate }) {
           const testimonials = useMemo(() => {
-            const thirtyDaysAgo = Date.now() - (TESTIMONIAL_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
             return candidates.filter(c => c.status === 'fulfilled' && c.testimonial && c.updatedAt > thirtyDaysAgo);
           }, [candidates]);
 
           return (
             <div className="space-y-8">
               <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] min-h-[380px] flex items-end p-8 text-white shadow-2xl group">
-                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-1000 group-hover:scale-105" alt="Background Landscape" />
+                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-1000 group-hover:scale-105" alt="SA" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/10 to-transparent"></div>
                 <div className="relative z-10 w-full">
                   <h2 className="text-4xl font-black mb-2 leading-tight">Provision is <br/><span className="text-indigo-400">Dignity</span>.</h2>
-                  <p className="text-sm text-slate-300 mb-6 italic max-w-sm">"Whatever you do, work at it with all your heart..." — Col 3:23</p>
-                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-500 active:scale-95 transition-all">Get Started</button>
+                  <p className="text-sm text-slate-300 mb-6 italic max-w-sm">"Whatever you do, work at it with all your heart, as working for the Lord..." — Col 3:23</p>
+                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 px-8 py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all">Get Started</button>
                 </div>
               </div>
 
@@ -201,7 +176,7 @@
                     <h3 className="font-black text-slate-800 flex items-center gap-2 px-2 text-lg uppercase tracking-tight">Praise Reports</h3>
                     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                         {testimonials.map(t => (
-                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex-shrink-0 animate-in fade-in slide-in-from-right-4">
+                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex-shrink-0">
                                 <p className="text-sm italic text-slate-600 mb-4 leading-relaxed font-medium">"{t.testimonial}"</p>
                                 <div className="flex items-center gap-3">
                                     <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl"><Icon name="CheckCircle" size={14}/></div>
@@ -239,85 +214,48 @@
             finally { setSubmitting(false); }
           };
 
-          const handleFile = (e) => {
-            const file = e.target.files[0];
-            if (file) setFileName(file.name);
-          };
-
           return (
             <div className="space-y-6">
               <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl">
-                <h2 className="text-2xl font-black mb-1">My Provision Profile</h2>
-                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Share your skills and faith</p>
+                <h2 className="text-2xl font-black mb-1">Candidate Profile</h2>
+                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Bridging faith and opportunity</p>
               </div>
-
-              {existingProfile && (
-                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
-                   <div>
-                     <h3 className="font-black text-slate-800">Status: <span className={formData.status === 'active' ? 'text-emerald-500' : 'text-indigo-500 uppercase'}>{formData.status}</span></h3>
-                   </div>
-                   <div className="flex gap-2">
-                     {formData.status === 'active' ? (
-                       <button onClick={() => {
-                          const test = prompt("Found Work? Share a brief praise report:");
-                          if (test) save({ status: 'fulfilled', testimonial: test });
-                       }} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md active:scale-95 transition-all">Mark Fulfilled</button>
-                     ) : (
-                       <button onClick={() => save({ status: 'active' })} className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md">Re-activate</button>
-                     )}
-                   </div>
-                </div>
-              )}
 
               <form onSubmit={(e) => { e.preventDefault(); save(); }} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Upload CV (PDF Simulation)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Upload CV (PDF)</label>
                     <div className="relative group p-4 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center gap-3 text-slate-400 text-xs font-bold hover:border-indigo-300 transition-all">
-                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={handleFile} />
+                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => setFileName(e.target.files[0]?.name || '')} />
                         <Icon name="Upload" size={16}/> {fileName || formData.cvName || "Click to attach PDF"}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Full Name</label>
-                    <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">WhatsApp Number</label>
-                    <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="WhatsApp Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                 </div>
 
-                <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Search Mode</label>
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Mode</label>
                     <div className="grid grid-cols-3 gap-2">
                         {['permanent', 'project', 'temporary'].map(type => (
-                            <button type="button" key={type} onClick={() => setFormData({...formData, workType: type})} className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all shadow-sm ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
+                            <button type="button" key={type} onClick={() => setFormData({...formData, workType: type})} className={`p-3 rounded-2xl border text-[10px] font-black uppercase transition-all ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
                         ))}
                     </div>
                 </div>
 
-                {formData.workType === 'temporary' && (
-                    <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 space-y-4 animate-in zoom-in-95">
-                        <div className="flex items-center gap-2 text-rose-700 font-black text-xs uppercase tracking-widest"><Icon name="Plus" size={14} /> Crisis Piece-Work Skills</div>
-                        <div className="grid grid-cols-1 gap-2">
-                            {[0, 1, 2].map(i => (
-                                <input key={i} required={formData.workType === 'temporary'} className="w-full p-3 bg-white border border-rose-100 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500" placeholder={`Daily Skill ${i+1}`} value={formData.pieceWorkSkills[i]} onChange={e => {
-                                    const n = [...formData.pieceWorkSkills]; n[i] = e.target.value; setFormData({...formData, pieceWorkSkills: n});
-                                }} />
-                            ))}
-                        </div>
-                    </div>
-                )}
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">My Story (Heart & Character)</label>
+                    <textarea required rows="3" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm" placeholder="Tell the community who you are..." value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} />
+                </div>
 
                 <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Prayer Request</label>
-                    <textarea rows="2" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-indigo-500" placeholder="How can the community stand in prayer for you?" value={formData.prayerRequest} onChange={e => setFormData({...formData, prayerRequest: e.target.value})} />
+                    <textarea rows="2" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm" placeholder="How can we pray for your provision?" value={formData.prayerRequest} onChange={e => setFormData({...formData, prayerRequest: e.target.value})} />
                 </div>
 
                 <button disabled={submitting} className={`w-full py-5 rounded-2xl font-black text-white shadow-xl transition-all uppercase text-xs tracking-widest active:scale-95 ${success ? 'bg-emerald-500' : 'bg-indigo-600'}`}>
-                  {submitting ? 'Connecting...' : success ? 'Profile Live! ✨' : 'Publish My Profile'}
+                  {submitting ? 'Connecting...' : success ? 'Published! ✨' : 'Publish My Profile'}
                 </button>
               </form>
             </div>
@@ -326,32 +264,23 @@
 
         function EntrepreneurView({ candidates }) {
           const [searchTerm, setSearchTerm] = useState('');
-          const filtered = candidates.filter(c => c.status === 'active' && (c.name.toLowerCase().includes(searchTerm.toLowerCase()) || (c.skills && c.skills.toLowerCase().includes(searchTerm.toLowerCase()))));
+          const active = candidates.filter(c => c.status === 'active');
+          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.skills?.toLowerCase().includes(searchTerm.toLowerCase()));
           return (
             <div className="space-y-6">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Icon name="Search" size={18}/></div>
-                <input className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] shadow-sm outline-none font-medium focus:ring-2 focus:ring-indigo-500" placeholder="Search skills or names..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <input className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] shadow-sm outline-none font-medium" placeholder="Search talent or skills..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
               </div>
               <div className="space-y-4">
                 {filtered.map(c => (
-                  <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all animate-in fade-in zoom-in-95">
+                  <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all">
                     <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 className="font-black text-xl text-slate-800 leading-none mb-1">{c.name}</h4>
-                            <p className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">{c.skills || 'Community Member'}</p>
-                        </div>
-                        <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${c.workType === 'temporary' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100'}`}>{c.workType}</span>
+                        <h4 className="font-black text-lg text-slate-800">{c.name}</h4>
+                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-full ${c.workType === 'temporary' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>{c.workType}</span>
                     </div>
-                    {c.workType === 'temporary' && c.pieceWorkSkills && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {c.pieceWorkSkills.map((s, i) => s && (
-                                <span key={i} className="text-[9px] font-black uppercase bg-slate-50 text-slate-500 px-3 py-1 rounded-lg border border-slate-100 shadow-sm">#{s}</span>
-                            ))}
-                        </div>
-                    )}
-                    <p className="text-sm italic text-slate-500 mb-8 pl-4 border-l-4 border-slate-50 leading-relaxed line-clamp-3">"{c.story || 'Sharing heart and character...'}"</p>
-                    <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}?text=Hello ${c.name}, I saw your profile on the Dignity Provision app...`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg">
+                    <p className="text-sm italic text-slate-500 mb-8 pl-4 border-l-4 border-slate-50 leading-relaxed line-clamp-3">"{c.story}"</p>
+                    <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform">
                       <Icon name="MessageSquare" size={14} /> Open WhatsApp Bridge
                     </button>
                   </div>
@@ -378,7 +307,7 @@
             <div className="space-y-6">
               <div className="relative bg-slate-900 rounded-[2.5rem] p-10 text-white min-h-[180px] flex items-center overflow-hidden">
                 <h2 className="text-3xl font-black relative z-10 tracking-tight leading-none uppercase">Prayer Wall</h2>
-                <div className="absolute top-0 right-0 p-8 opacity-10"><PrayingHandsIcon size={140}/></div>
+                <div className="absolute top-0 right-0 p-8 opacity-10"><PrayingHandsIcon size={120}/></div>
               </div>
               <div className="grid gap-4">
                 {prayers.map(c => (
@@ -400,34 +329,19 @@
         }
 
         function AdminView({ candidates }) {
-          const del = async (id) => { 
-            if (confirm("Delete profile? This cannot be undone.")) {
-              try {
-                const profileDoc = doc(getDataCollection('candidates'), id);
-                await deleteDoc(profileDoc);
-              } catch (err) { console.error(err); }
-            }
-          };
+          const del = async (id) => { if (confirm("Delete profile? This cannot be undone.")) await deleteDoc(doc(getDataCollection('candidates'), id)); };
           return (
             <div className="space-y-4 animate-in slide-in-from-top">
-              <div className="bg-slate-800 p-8 rounded-[2.5rem] text-white flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-black leading-none mb-1">Moderation Hub</h2>
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{candidates.length} Profiles Managed</p>
-                </div>
-                <Icon name="Settings" size={24} className="opacity-20" />
-              </div>
-              <div className="grid gap-3">
-                {candidates.sort((a,b) => b.updatedAt - a.updatedAt).map(c => (
-                  <div key={c.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
-                    <div>
-                      <p className="font-black text-slate-800 leading-none">{c.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{c.status} • {c.workType}</p>
-                    </div>
-                    <button onClick={() => del(c.id)} className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors active:scale-90"><Icon name="Trash2" size={18}/></button>
+              <h2 className="font-black text-2xl px-2">Moderation Dashboard</h2>
+              {candidates.map(c => (
+                <div key={c.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                  <div>
+                    <p className="font-black text-slate-800 leading-none">{c.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{c.status} • {c.workType}</p>
                   </div>
-                ))}
-              </div>
+                  <button onClick={() => del(c.id)} className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors active:scale-90"><Icon name="Trash2" size={18}/></button>
+                </div>
+              ))}
             </div>
           );
         }
