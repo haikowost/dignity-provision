@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dignity Provision | 3CI Community</title>
+    <!-- Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -19,7 +20,7 @@
 
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICONS (SVG Implementation for Reliability) ---
+        // --- STABLE SVG ICONS ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
                 Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
@@ -49,7 +50,7 @@
           </svg>
         );
 
-        // --- FIREBASE CONFIGURATION ---
+        // --- FIREBASE PROJECT KEYS (PRE-LOADED) ---
         const firebaseConfig = {
             apiKey: "AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
             authDomain: "friendof3ci-dignity-provision.firebaseapp.com",
@@ -65,6 +66,7 @@
         const appId = "friendof3ci-dignity-provision"; 
         const ACCESS_CODE = "3Ci";
 
+        // RULE 1: /artifacts/{appId}/public/data/{collection}
         const getDataCollection = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
 
         function App() {
@@ -108,11 +110,11 @@
                     <div className="max-w-md w-full text-center space-y-8 animate-in fade-in duration-700">
                         <div className="bg-white/10 p-8 rounded-[2.5rem] backdrop-blur-md border border-white/20 shadow-2xl">
                             <div className="bg-white text-indigo-900 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6"><Icon name="Lock" size={32} /></div>
-                            <h1 className="text-3xl font-black mb-2 tracking-tighter">3CI COMMUNITY</h1>
+                            <h1 className="text-3xl font-black mb-2 tracking-tighter uppercase">3CI Community</h1>
                             <p className="text-indigo-200 text-sm mb-8 font-medium italic">"Dignity Through Provision"</p>
                             <form onSubmit={handleAccess} className="space-y-4">
-                                <input type="password" placeholder="Access Code" className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold outline-none focus:bg-white/20 transition-all placeholder:text-white/30" value={accessInput} onChange={(e) => setAccessInput(e.target.value)} />
-                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl">Unlock Access</button>
+                                <input type="password" placeholder="Enter Access Code" className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold outline-none focus:bg-white/20 transition-all placeholder:text-white/30" value={accessInput} onChange={(e) => setAccessInput(e.target.value)} />
+                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl">Enter App</button>
                             </form>
                         </div>
                     </div>
@@ -129,7 +131,7 @@
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">3CI Men's Group</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full transition-all ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}><Icon name="Settings" size={18} /></button>
+                    <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full transition-all ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`} title="Admin Panel"><Icon name="Settings" size={18} /></button>
                     <div className="bg-indigo-50 p-2 rounded-full"><Icon name="Shield" size={18} className="text-indigo-600" /></div>
                   </div>
                 </div>
@@ -153,6 +155,7 @@
           );
         }
 
+        // --- VIEWS ---
         function HomeView({ candidates, onNavigate }) {
           const testimonials = useMemo(() => {
             const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
@@ -162,12 +165,12 @@
           return (
             <div className="space-y-8">
               <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] min-h-[380px] flex items-end p-8 text-white shadow-2xl group">
-                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-1000 group-hover:scale-105" alt="SA" />
+                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-1000 group-hover:scale-105" alt="SA Landscape" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/10 to-transparent"></div>
                 <div className="relative z-10 w-full">
                   <h2 className="text-4xl font-black mb-2 leading-tight">Provision is <br/><span className="text-indigo-400">Dignity</span>.</h2>
                   <p className="text-sm text-slate-300 mb-6 italic max-w-sm">"Whatever you do, work at it with all your heart, as working for the Lord..." — Col 3:23</p>
-                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 px-8 py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all">Get Started</button>
+                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 px-8 py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all">Register Now</button>
                 </div>
               </div>
 
@@ -176,7 +179,7 @@
                     <h3 className="font-black text-slate-800 flex items-center gap-2 px-2 text-lg uppercase tracking-tight">Praise Reports</h3>
                     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                         {testimonials.map(t => (
-                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex-shrink-0">
+                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex-shrink-0 animate-in fade-in slide-in-from-right-4">
                                 <p className="text-sm italic text-slate-600 mb-4 leading-relaxed font-medium">"{t.testimonial}"</p>
                                 <div className="flex items-center gap-3">
                                     <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl"><Icon name="CheckCircle" size={14}/></div>
@@ -217,45 +220,63 @@
           return (
             <div className="space-y-6">
               <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl">
-                <h2 className="text-2xl font-black mb-1">Candidate Profile</h2>
-                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Bridging faith and opportunity</p>
+                <h2 className="text-2xl font-black mb-1">Provision Profile</h2>
+                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Share your skills and characters</p>
               </div>
+
+              {existingProfile && (
+                <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
+                   <div>
+                     <h3 className="font-black text-slate-800 uppercase text-xs">Profile: <span className={formData.status === 'active' ? 'text-emerald-500' : 'text-indigo-500'}>{formData.status}</span></h3>
+                   </div>
+                   <div className="flex gap-2">
+                     {formData.status === 'active' ? (
+                       <button onClick={() => {
+                          const test = prompt("Shared God's provision! Briefly share a praise report:");
+                          if (test) save({ status: 'fulfilled', testimonial: test });
+                       }} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md active:scale-95 transition-all">Fulfilled!</button>
+                     ) : (
+                       <button onClick={() => save({ status: 'active' })} className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-black shadow-md">Re-activate</button>
+                     )}
+                   </div>
+                </div>
+              )}
 
               <form onSubmit={(e) => { e.preventDefault(); save(); }} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Upload CV (PDF)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">CV Attachment (Simulated)</label>
                     <div className="relative group p-4 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center gap-3 text-slate-400 text-xs font-bold hover:border-indigo-300 transition-all">
                         <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => setFileName(e.target.files[0]?.name || '')} />
-                        <Icon name="Upload" size={16}/> {fileName || formData.cvName || "Click to attach PDF"}
+                        <Icon name="Upload" size={16}/> {fileName || formData.cvName || "Select PDF CV"}
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="WhatsApp Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="WhatsApp No." value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                 </div>
 
-                <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Mode</label>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">I am seeking:</label>
                     <div className="grid grid-cols-3 gap-2">
                         {['permanent', 'project', 'temporary'].map(type => (
-                            <button type="button" key={type} onClick={() => setFormData({...formData, workType: type})} className={`p-3 rounded-2xl border text-[10px] font-black uppercase transition-all ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
+                            <button key={type} type="button" onClick={() => setFormData({...formData, workType: type})} className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all shadow-sm ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
                         ))}
                     </div>
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">My Story (Heart & Character)</label>
-                    <textarea required rows="3" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm" placeholder="Tell the community who you are..." value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">My Story & Character</label>
+                    <textarea required rows="3" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-indigo-500" placeholder="Briefly share your story and faith journey..." value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} />
                 </div>
 
                 <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Prayer Request</label>
-                    <textarea rows="2" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm" placeholder="How can we pray for your provision?" value={formData.prayerRequest} onChange={e => setFormData({...formData, prayerRequest: e.target.value})} />
+                    <textarea rows="2" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-indigo-500" placeholder="How can the community stand in prayer with you?" value={formData.prayerRequest} onChange={e => setFormData({...formData, prayerRequest: e.target.value})} />
                 </div>
 
                 <button disabled={submitting} className={`w-full py-5 rounded-2xl font-black text-white shadow-xl transition-all uppercase text-xs tracking-widest active:scale-95 ${success ? 'bg-emerald-500' : 'bg-indigo-600'}`}>
-                  {submitting ? 'Connecting...' : success ? 'Published! ✨' : 'Publish My Profile'}
+                  {submitting ? 'Connecting...' : success ? 'Published! ✨' : 'Save & Publish'}
                 </button>
               </form>
             </div>
@@ -265,22 +286,26 @@
         function EntrepreneurView({ candidates }) {
           const [searchTerm, setSearchTerm] = useState('');
           const active = candidates.filter(c => c.status === 'active');
-          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.skills?.toLowerCase().includes(searchTerm.toLowerCase()));
+          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || (c.skills && c.skills.toLowerCase().includes(searchTerm.toLowerCase())));
+
           return (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in">
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Icon name="Search" size={18}/></div>
-                <input className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] shadow-sm outline-none font-medium" placeholder="Search talent or skills..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <input className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] shadow-sm outline-none font-medium focus:ring-2 focus:ring-indigo-500" placeholder="Search talent or skills..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
               </div>
               <div className="space-y-4">
                 {filtered.map(c => (
-                  <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all">
+                  <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all animate-in fade-in zoom-in-95">
                     <div className="flex justify-between items-start mb-4">
-                        <h4 className="font-black text-lg text-slate-800">{c.name}</h4>
-                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-full ${c.workType === 'temporary' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>{c.workType}</span>
+                        <div>
+                            <h4 className="font-black text-xl text-slate-800 leading-none mb-1">{c.name}</h4>
+                            <p className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">{c.skills || '3CI Member'}</p>
+                        </div>
+                        <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${c.workType === 'temporary' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100'}`}>{c.workType}</span>
                     </div>
-                    <p className="text-sm italic text-slate-500 mb-8 pl-4 border-l-4 border-slate-50 leading-relaxed line-clamp-3">"{c.story}"</p>
-                    <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                    <p className="text-sm italic text-slate-500 mb-8 pl-4 border-l-4 border-slate-50 leading-relaxed line-clamp-3">"{c.story || 'Character and heart summary...'}"</p>
+                    <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}?text=Hello ${c.name}, I saw your profile on the Dignity Provision app...`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg">
                       <Icon name="MessageSquare" size={14} /> Open WhatsApp Bridge
                     </button>
                   </div>
@@ -307,7 +332,7 @@
             <div className="space-y-6">
               <div className="relative bg-slate-900 rounded-[2.5rem] p-10 text-white min-h-[180px] flex items-center overflow-hidden">
                 <h2 className="text-3xl font-black relative z-10 tracking-tight leading-none uppercase">Prayer Wall</h2>
-                <div className="absolute top-0 right-0 p-8 opacity-10"><PrayingHandsIcon size={120}/></div>
+                <div className="absolute top-0 right-0 p-8 opacity-10"><PrayingHandsIcon size={140}/></div>
               </div>
               <div className="grid gap-4">
                 {prayers.map(c => (
@@ -317,7 +342,7 @@
                         <h4 className="text-indigo-600 font-black uppercase text-sm tracking-widest">{c.name}</h4>
                         <div className="flex items-center gap-1 text-[10px] text-slate-300 font-black"><Icon name="Heart" size={12} className="fill-rose-500 text-rose-500"/> {c.prayerCount || 0}</div>
                     </div>
-                    <p className="text-slate-600 text-sm italic font-medium leading-relaxed mb-8">"{c.prayerRequest || "Praying for God's provision and wisdom in the job search."}"</p>
+                    <p className="text-slate-600 text-sm italic font-medium leading-relaxed mb-8">"{c.prayerRequest || "Praying for God's provision and wisdom in this job search."}"</p>
                     <button onClick={() => handlePray(c.id)} disabled={prayedIds.has(c.id)} className={`w-full py-5 rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all ${prayedIds.has(c.id) ? 'bg-slate-50 text-slate-300' : 'bg-amber-400 text-white'}`}>
                         {prayedIds.has(c.id) ? 'I am Interceding' : 'Commit to Pray'}
                     </button>
@@ -329,19 +354,34 @@
         }
 
         function AdminView({ candidates }) {
-          const del = async (id) => { if (confirm("Delete profile? This cannot be undone.")) await deleteDoc(doc(getDataCollection('candidates'), id)); };
+          const del = async (id) => { 
+            if (confirm("Delete profile permanently?")) {
+              try {
+                const profileDoc = doc(getDataCollection('candidates'), id);
+                await deleteDoc(profileDoc);
+              } catch (err) { console.error(err); }
+            }
+          };
           return (
             <div className="space-y-4 animate-in slide-in-from-top">
-              <h2 className="font-black text-2xl px-2">Moderation Dashboard</h2>
-              {candidates.map(c => (
-                <div key={c.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
-                  <div>
-                    <p className="font-black text-slate-800 leading-none">{c.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{c.status} • {c.workType}</p>
-                  </div>
-                  <button onClick={() => del(c.id)} className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors active:scale-90"><Icon name="Trash2" size={18}/></button>
+              <div className="bg-slate-800 p-8 rounded-[2.5rem] text-white flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-black leading-none mb-1 uppercase">Moderation</h2>
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{candidates.length} Registered Profiles</p>
                 </div>
-              ))}
+                <Icon name="Settings" size={24} className="opacity-20" />
+              </div>
+              <div className="grid gap-3">
+                {candidates.sort((a,b) => b.updatedAt - a.updatedAt).map(c => (
+                  <div key={c.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div>
+                      <p className="font-black text-slate-800 leading-none">{c.name}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{c.status} • {c.workType}</p>
+                    </div>
+                    <button onClick={() => del(c.id)} className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors active:scale-90"><Icon name="Trash2" size={18}/></button>
+                  </div>
+                ))}
+              </div>
             </div>
           );
         }
