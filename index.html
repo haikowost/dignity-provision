@@ -4,22 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dignity Provision | 3CI Community</title>
+    <!-- Modern Framework CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 font-sans antialiased">
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
+        // --- Firebase Modular SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, increment, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICONS (Custom SVG for Maximum Stability) ---
+        // --- ICONS (SVG Implementation for Reliability) ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
                 Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
@@ -32,7 +34,9 @@
                 Home: <><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></>,
                 Trash2: <><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" /></>,
                 Settings: <><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></>,
-                Lock: <><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>
+                Lock: <><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+                Upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></>,
+                MessageSquare: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             };
             return (
                 <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -47,13 +51,37 @@
           </svg>
         );
 
-        // --- Firebase Config Logic ---
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // --- FIREBASE CONFIGURATION ---
+        let firebaseConfig;
+        try {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } catch (e) {
+            // MANUAL DEPLOYMENT: Replace the values below with your specific keys
+            firebaseConfig = {
+                apiKey: ""AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
+                authDomain: "friendof3ci-dignity-provision.firebaseapp.com",
+                projectId: "friendof3ci-dignity-provision",
+                storageBucket: "friendof3ci-dignity-provision.appspot.com",
+                messagingSenderId: "251880622781",
+                appId: "1:251880622781:web:0bde3a9b9a78cf5f3385d4"
+            };
+        }
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'church-employment-init';
+        
+        // RULE 1 Sanitization: Ensures path segments are clean
+        const rawAppId = typeof __app_id !== 'undefined' ? __app_id : "friendof3ci-dignity-provision"; 
+        const appId = rawAppId.replace(/[\/\.]/g, '_');
+        
         const ACCESS_CODE = "3Ci";
+        const TESTIMONIAL_EXPIRY_DAYS = 30;
+
+        // SAFE PATH HELPER: Follows mandatory path structure strictly
+        const getDataCollection = (collectionName) => {
+            return collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+        };
 
         function App() {
           const [user, setUser] = useState(null);
@@ -64,14 +92,15 @@
           const [loading, setLoading] = useState(true);
           const [isAdmin, setIsAdmin] = useState(false);
 
-          // Auth logic
           useEffect(() => {
             const initAuth = async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (err) { console.error("Auth Error:", err); }
             };
             initAuth();
             const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -84,77 +113,51 @@
             return () => unsubscribe();
           }, []);
 
-          // Data Fetching logic
           useEffect(() => {
             if (!user || !authorized) return;
-            const candRef = collection(db, 'artifacts', appId, 'public', 'data', 'candidates');
+            const candRef = getDataCollection('candidates');
             const unsub = onSnapshot(candRef, (snapshot) => {
               setCandidates(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            });
+            }, (error) => console.error("Firestore Error:", error));
             return () => unsub();
           }, [user, authorized]);
 
           const handleAccess = (e) => {
             e.preventDefault();
-            if (accessInput === ACCESS_CODE) {
-                setAuthorized(true);
-            } else {
-                alert("Incorrect code. Please check with your Men's Group lead.");
-            }
+            if (accessInput === ACCESS_CODE) setAuthorized(true);
+            else alert("Incorrect Access Code.");
           };
 
-          if (loading) return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            </div>
-          );
+          if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
 
-          // ACCESS GATE UI
           if (!authorized) {
             return (
                 <div className="min-h-screen bg-indigo-900 flex items-center justify-center p-6 text-white">
                     <div className="max-w-md w-full text-center space-y-8">
-                        <div className="bg-white/10 p-6 rounded-[2.5rem] backdrop-blur-md border border-white/20">
-                            <div className="bg-white text-indigo-900 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-                                <Icon name="Lock" size={32} />
-                            </div>
-                            <h1 className="text-3xl font-black mb-2">3CI Community</h1>
-                            <p className="text-indigo-200 text-sm mb-8">Please enter the community access code to view provision opportunities.</p>
-                            
+                        <div className="bg-white/10 p-8 rounded-[2.5rem] backdrop-blur-md border border-white/20 shadow-2xl">
+                            <div className="bg-white text-indigo-900 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6"><Icon name="Lock" size={32} /></div>
+                            <h1 className="text-3xl font-black mb-2 leading-none uppercase tracking-tighter">3CI Community</h1>
+                            <p className="text-indigo-200 text-sm mb-8 font-medium italic">"Dignity Through Provision"</p>
                             <form onSubmit={handleAccess} className="space-y-4">
-                                <input 
-                                    type="password" 
-                                    placeholder="Enter Code" 
-                                    className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold tracking-widest outline-none focus:bg-white/20 transition-all"
-                                    value={accessInput}
-                                    onChange={(e) => setAccessInput(e.target.value)}
-                                />
-                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-transform">
-                                    Enter Provision
-                                </button>
+                                <input type="password" placeholder="Access Code" className="w-full p-4 bg-white/10 border border-white/30 rounded-2xl text-center text-xl font-bold outline-none focus:bg-white/20 transition-all placeholder:text-white/40" value={accessInput} onChange={(e) => setAccessInput(e.target.value)} />
+                                <button className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl">Unlock Gateway</button>
                             </form>
                         </div>
-                        <p className="text-xs text-indigo-400 uppercase font-black tracking-widest">Dignity Through Provision</p>
                     </div>
                 </div>
             );
           }
 
-          // MAIN APP UI
           return (
-            <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-24">
+            <div className="min-h-screen bg-slate-50 text-slate-900 pb-24">
               <header className="bg-white border-b border-slate-200 sticky top-0 z-50 px-6 py-4 shadow-sm">
                 <div className="max-w-4xl mx-auto flex justify-between items-center">
                   <div>
-                    <h1 className="text-xl font-black tracking-tight text-slate-800">Dignity <span className="text-indigo-600">Provision</span></h1>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Church Employment Initiative</p>
+                    <h1 className="text-xl font-black tracking-tight leading-none">Dignity <span className="text-indigo-600">Provision</span></h1>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">3CI Men's Group Initiative</p>
                   </div>
                   <div className="flex gap-2">
-                    {isAdmin && (
-                      <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full transition-colors ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <Icon name="Settings" size={18} />
-                      </button>
-                    )}
+                    {isAdmin && <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-full ${activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}><Icon name="Settings" size={18} /></button>}
                     <div className="bg-indigo-50 p-2 rounded-full"><Icon name="Shield" size={18} className="text-indigo-600" /></div>
                   </div>
                 </div>
@@ -163,51 +166,49 @@
               <main className="max-w-4xl mx-auto p-4 sm:p-6">
                 {activeTab === 'home' && <HomeView candidates={candidates} onNavigate={setActiveTab} />}
                 {activeTab === 'candidate' && <CandidateView userId={user.uid} existingProfile={candidates.find(c => c.id === user.uid)} />}
-                {activeTab === 'entrepreneur' && <EntrepreneurView candidates={candidates} isAdmin={isAdmin} />}
+                {activeTab === 'entrepreneur' && <EntrepreneurView candidates={candidates} />}
                 {activeTab === 'intercessory' && <IntercessoryView candidates={candidates} />}
                 {activeTab === 'admin' && isAdmin && <AdminView candidates={candidates} />}
               </main>
 
-              <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl px-2 flex justify-around items-center z-50">
-                <TabButton id="home" iconName="Home" label="Home" />
-                <TabButton id="candidate" iconName="User" label="Profile" />
-                <TabButton id="entrepreneur" iconName="Briefcase" label="Gaps" />
-                <TabButton id="intercessory" iconName="Heart" label="Pray" />
+              <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl px-2 flex justify-around items-center z-50 py-1">
+                <TabButton id="home" iconName="Home" label="Home" activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabButton id="candidate" iconName="User" label="Profile" activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabButton id="entrepreneur" iconName="Briefcase" label="Talent" activeTab={activeTab} setActiveTab={setActiveTab} />
+                <TabButton id="intercessory" iconName="Heart" label="Pray" activeTab={activeTab} setActiveTab={setActiveTab} />
               </nav>
             </div>
           );
         }
 
-        // --- SUB-VIEWS ---
         function HomeView({ candidates, onNavigate }) {
           const testimonials = useMemo(() => {
-            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            const thirtyDaysAgo = Date.now() - (TESTIMONIAL_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
             return candidates.filter(c => c.status === 'fulfilled' && c.testimonial && c.updatedAt > thirtyDaysAgo);
           }, [candidates]);
 
           return (
             <div className="space-y-8 animate-in fade-in">
-              <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] min-h-[350px] flex items-end p-8 text-white shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40" alt="SA" />
+              <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] min-h-[380px] flex items-end p-8 text-white shadow-2xl group">
+                <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?q=80&w=1200&auto=format&fit=crop" className="absolute inset-0 w-full h-full object-cover opacity-40 transition-transform duration-1000 group-hover:scale-105" alt="SA Landscape" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/10 to-transparent"></div>
                 <div className="relative z-10 w-full">
-                  <h2 className="text-4xl font-black mb-4 leading-tight">Provision is <span className="text-indigo-400">Dignity</span>.</h2>
-                  <p className="text-sm text-slate-300 max-w-sm mb-6 font-medium italic">"Whatever you do, work at it with all your heart, as working for the Lord..." — Col 3:23</p>
-                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95">
-                    Register for Provision
-                  </button>
+                  <h2 className="text-4xl font-black mb-2 leading-tight">Work as <br/><span className="text-indigo-400">Worship</span>.</h2>
+                  <p className="text-sm text-slate-300 mb-6 italic max-w-sm">"Whatever you do, work at it with all your heart, as working for the Lord..." — Col 3:23</p>
+                  <button onClick={() => onNavigate('candidate')} className="bg-indigo-600 px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:bg-indigo-500 active:scale-95 transition-all">Get Started</button>
                 </div>
               </div>
 
               {testimonials.length > 0 && (
                 <div className="space-y-4">
                     <h3 className="font-black text-slate-800 flex items-center gap-2 px-2 text-lg uppercase tracking-tight">Praise Reports</h3>
-                    <div className="flex gap-4 overflow-x-auto pb-4">
+                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                         {testimonials.map(t => (
-                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                            <div key={t.id} className="min-w-[280px] bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex-shrink-0">
                                 <p className="text-sm italic text-slate-600 mb-4 leading-relaxed font-medium">"{t.testimonial}"</p>
                                 <div className="flex items-center gap-3">
                                     <div className="bg-indigo-50 text-indigo-600 p-2 rounded-xl"><Icon name="CheckCircle" size={14}/></div>
-                                    <p className="text-xs font-black text-slate-800 uppercase">{t.name}</p>
+                                    <p className="text-xs font-black text-slate-800 uppercase tracking-widest">{t.name}</p>
                                 </div>
                             </div>
                         ))}
@@ -221,21 +222,19 @@
         function CandidateView({ userId, existingProfile }) {
           const [submitting, setSubmitting] = useState(false);
           const [success, setSuccess] = useState(false);
+          const [fileName, setFileName] = useState('');
           const [formData, setFormData] = useState({
             name: '', phone: '', skills: '', story: '', prayerRequest: '', 
-            urgency: 'growth', workType: 'permanent', status: 'active', testimonial: '',
-            pieceWorkSkills: ['', '', '']
+            urgency: 'growth', workType: 'permanent', status: 'active', pieceWorkSkills: ['', '', '']
           });
 
-          useEffect(() => {
-            if (existingProfile) setFormData(prev => ({ ...prev, ...existingProfile }));
-          }, [existingProfile]);
+          useEffect(() => { if (existingProfile) setFormData(prev => ({ ...prev, ...existingProfile })); }, [existingProfile]);
 
           const save = async (updates = {}) => {
             setSubmitting(true);
             try {
-              const profileDoc = doc(db, 'artifacts', appId, 'public', 'data', 'candidates', userId);
-              await setDoc(profileDoc, { ...formData, ...updates, updatedAt: Date.now() });
+              const profileDoc = doc(getDataCollection('candidates'), userId);
+              await setDoc(profileDoc, { ...formData, ...updates, updatedAt: Date.now(), cvName: fileName || '' });
               setSuccess(true);
               setTimeout(() => setSuccess(false), 3000);
             } catch (err) { console.error(err); } finally { setSubmitting(false); }
@@ -244,29 +243,53 @@
           return (
             <div className="space-y-6">
               <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl">
-                <h2 className="text-2xl font-black mb-1">Candidate Profile</h2>
+                <h2 className="text-2xl font-black mb-1">My Provision Profile</h2>
                 <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Bridging faith and opportunity</p>
               </div>
 
               <form onSubmit={(e) => { e.preventDefault(); save(); }} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Full Name</label>
-                    <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">WhatsApp No.</label>
-                    <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                  </div>
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Upload CV (PDF)</label>
+                    <div className="relative group p-4 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center gap-3 text-slate-400 text-xs font-bold hover:border-indigo-300 transition-all">
+                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => setFileName(e.target.files[0]?.name || '')} />
+                        <Icon name="Upload" size={16}/> {fileName || "Click to attach PDF"}
+                    </div>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="WhatsApp Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                </div>
+
+                <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Mode</label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {['permanent', 'project', 'temporary'].map(type => (
+                            <button type="button" key={type} onClick={() => setFormData({...formData, workType: type})} className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all shadow-sm ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
+                        ))}
+                    </div>
+                </div>
+
+                {formData.workType === 'temporary' && (
+                    <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 space-y-4 animate-in zoom-in-95">
+                        <div className="flex items-center gap-2 text-rose-700 font-black text-xs uppercase tracking-widest"><Icon name="Plus" size={14} /> Crisis Piece-Work Skills</div>
+                        <div className="grid grid-cols-1 gap-2">
+                            {[0, 1, 2].map(i => (
+                                <input key={i} required={formData.workType === 'temporary'} className="w-full p-3 bg-white border border-rose-100 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500" placeholder={`Daily Skill ${i+1}`} value={formData.pieceWorkSkills[i]} onChange={e => {
+                                    const n = [...formData.pieceWorkSkills]; n[i] = e.target.value; setFormData({...formData, pieceWorkSkills: n});
+                                }} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Skills & Character</label>
-                    <textarea required rows="3" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm" value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">My Story (Heart & Character)</label>
+                    <textarea required rows="3" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm focus:ring-2 focus:ring-indigo-500" placeholder="Briefly share your faith journey and character..." value={formData.story} onChange={e => setFormData({...formData, story: e.target.value})} />
                 </div>
 
-                <button disabled={submitting} className={`w-full py-5 rounded-2xl font-black text-white shadow-xl transition-all uppercase text-xs tracking-widest ${success ? 'bg-emerald-500' : 'bg-indigo-600'}`}>
-                  {submitting ? 'Connecting...' : success ? 'Saved! ✨' : 'Publish My Profile'}
+                <button disabled={submitting} className={`w-full py-5 rounded-2xl font-black text-white shadow-xl transition-all uppercase text-xs tracking-widest active:scale-95 ${success ? 'bg-emerald-500' : 'bg-indigo-600'}`}>
+                  {submitting ? 'Connecting...' : success ? 'Published! ✨' : 'Publish My Profile'}
                 </button>
               </form>
             </div>
@@ -274,37 +297,75 @@
         }
 
         function EntrepreneurView({ candidates }) {
+          const [searchTerm, setSearchTerm] = useState('');
           const active = candidates.filter(c => c.status === 'active');
+          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.skills?.toLowerCase().includes(searchTerm.toLowerCase()));
+
           return (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-black px-2">Active Talent</h2>
-              {active.map(c => (
-                <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
-                  <h4 className="font-black text-lg text-slate-800">{c.name}</h4>
-                  <p className="text-indigo-600 font-black text-[10px] uppercase tracking-widest mb-4">{c.skills}</p>
-                  <p className="text-sm italic text-slate-500 mb-6 pl-4 border-l-2 border-slate-100">"{c.story}"</p>
-                  <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                    <Icon name="MessageSquare" size={14} /> Contact Bridge
-                  </button>
-                </div>
-              ))}
+            <div className="space-y-6 animate-in fade-in">
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Icon name="Search" size={18}/></div>
+                <input className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-[1.5rem] shadow-sm outline-none font-medium focus:ring-2 focus:ring-indigo-500" placeholder="Search talent..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              </div>
+              <div className="space-y-4">
+                {filtered.map(c => (
+                  <div key={c.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 className="font-black text-xl text-slate-800 leading-none mb-1">{c.name}</h4>
+                            <p className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">{c.skills || 'Community Member'}</p>
+                        </div>
+                        <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full border ${c.workType === 'temporary' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-indigo-50 text-indigo-600 border-indigo-100'}`}>{c.workType}</span>
+                    </div>
+                    {c.workType === 'temporary' && c.pieceWorkSkills && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {c.pieceWorkSkills.map((s, i) => s && (
+                                <span key={i} className="text-[9px] font-black uppercase bg-slate-50 text-slate-500 px-3 py-1 rounded-lg border border-slate-100 shadow-sm">#{s}</span>
+                            ))}
+                        </div>
+                    )}
+                    <p className="text-sm italic text-slate-500 mb-8 pl-4 border-l-4 border-slate-50 leading-relaxed line-clamp-3">"{c.story}"</p>
+                    <button onClick={() => window.open(`https://wa.me/${c.phone?.replace(/\s/g, '')}?text=Hello ${c.name}, I saw your profile on the Dignity Provision app...`)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 active:scale-95 transition-all">
+                      <Icon name="MessageSquare" size={14} /> Open WhatsApp Bridge
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           );
         }
 
         function IntercessoryView({ candidates }) {
           const prayers = candidates.filter(c => c.status === 'active' && c.prayerRequest);
+          const [prayedIds, setPrayedIds] = useState(new Set());
+
+          const handlePray = async (id) => {
+            if (prayedIds.has(id)) return;
+            try {
+              const profileDoc = doc(getDataCollection('candidates'), id);
+              await updateDoc(profileDoc, { prayerCount: increment(1) });
+              setPrayedIds(prev => new Set([...prev, id]));
+            } catch(e) { console.error(e); }
+          };
+
           return (
             <div className="space-y-6">
-              <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white min-h-[150px] flex items-center">
-                <h2 className="text-3xl font-black tracking-tight">Prayer Wall</h2>
+              <div className="relative bg-slate-900 rounded-[2.5rem] p-10 text-white min-h-[180px] flex items-center overflow-hidden">
+                <h2 className="text-3xl font-black relative z-10 tracking-tight leading-none uppercase">Prayer Wall</h2>
+                <div className="absolute top-0 right-0 p-8 opacity-10"><PrayingHandsIcon size={140}/></div>
               </div>
               <div className="grid gap-4">
                 {prayers.map(c => (
-                  <div key={c.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm">
-                    <h4 className="text-indigo-600 font-black uppercase mb-2">{c.name}</h4>
-                    <p className="text-slate-600 text-sm italic font-medium leading-relaxed mb-6">"{c.prayerRequest}"</p>
-                    <button className="w-full py-4 bg-amber-400 text-white rounded-2xl font-black text-xs uppercase shadow-lg">Stand in Prayer</button>
+                  <div key={c.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm relative group overflow-hidden">
+                    <div className="absolute top-0 right-0 w-2 h-full bg-amber-400"></div>
+                    <div className="flex justify-between items-start mb-4">
+                        <h4 className="text-indigo-600 font-black uppercase text-sm tracking-widest">{c.name}</h4>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-300 font-black"><Icon name="Heart" size={12} className="fill-rose-500 text-rose-500"/> {c.prayerCount || 0}</div>
+                    </div>
+                    <p className="text-slate-600 text-sm italic font-medium leading-relaxed mb-8">"{c.prayerRequest}"</p>
+                    <button onClick={() => handlePray(c.id)} disabled={prayedIds.has(c.id)} className={`w-full py-5 rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all ${prayedIds.has(c.id) ? 'bg-slate-50 text-slate-300' : 'bg-amber-400 text-white'}`}>
+                        {prayedIds.has(c.id) ? 'I am Interceding' : 'Commit to Pray'}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -313,17 +374,24 @@
         }
 
         function AdminView({ candidates }) {
-          const del = async (id) => {
-            if (!confirm("Delete?")) return;
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'candidates', id));
+          const del = async (id) => { 
+            if (confirm("Delete profile? This cannot be undone.")) {
+              try {
+                const profileDoc = doc(getDataCollection('candidates'), id);
+                await deleteDoc(profileDoc);
+              } catch (err) { console.error(err); }
+            }
           };
           return (
-            <div className="space-y-4">
-              <h2 className="font-black text-2xl">Moderation</h2>
+            <div className="space-y-4 animate-in slide-in-from-top">
+              <h2 className="font-black text-2xl px-2">Moderation Dashboard</h2>
               {candidates.map(c => (
-                <div key={c.id} className="bg-white p-5 rounded-2xl border flex justify-between items-center">
-                  <p className="font-bold">{c.name}</p>
-                  <button onClick={() => del(c.id)} className="p-2 bg-rose-50 text-rose-600 rounded-lg"><Icon name="Trash2" size={16}/></button>
+                <div key={c.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                  <div>
+                    <p className="font-black text-slate-800 leading-none">{c.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{c.status} • {c.workType}</p>
+                  </div>
+                  <button onClick={() => del(c.id)} className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors"><Icon name="Trash2" size={18}/></button>
                 </div>
               ))}
             </div>
@@ -332,14 +400,9 @@
 
         function TabButton({ id, iconName, label, activeTab, setActiveTab }) {
           return (
-            <button
-              onClick={() => setActiveTab(id)}
-              className={`flex flex-col items-center py-2 px-3 flex-1 transition-all ${
-                activeTab === id ? 'text-indigo-600 border-t-2 border-indigo-600' : 'text-slate-400'
-              }`}
-            >
-              <Icon name={iconName} size={18} className="mb-1" />
-              <span className="text-[9px] font-bold uppercase tracking-wider">{label}</span>
+            <button onClick={() => setActiveTab(id)} className={`flex flex-col items-center py-2 px-3 flex-1 transition-all ${activeTab === id ? 'text-indigo-600 border-t-2 border-indigo-600' : 'text-slate-400'}`}>
+              <Icon name={iconName} size={20} className="mb-1" />
+              <span className="text-[9px] font-black uppercase tracking-[0.1em]">{label}</span>
             </button>
           );
         }
