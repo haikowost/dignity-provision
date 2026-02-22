@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dignity Provision | 3CI Community</title>
-    <!-- Modern Framework CDNs -->
+    <!-- Framework CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -21,7 +21,7 @@
 
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICONS (SVG Implementation for Reliability) ---
+        // --- ICONS (SVG Implementation for Maximum Stability) ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const icons = {
                 Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />,
@@ -54,11 +54,16 @@
         // --- FIREBASE CONFIGURATION ---
         let firebaseConfig;
         try {
-            firebaseConfig = JSON.parse(__firebase_config);
+            // Internal runtime check
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                throw new Error("Local Dev");
+            }
         } catch (e) {
-            // MANUAL DEPLOYMENT: Replace the values below with your specific keys
+            // YOUR ACTUAL PROJECT KEYS
             firebaseConfig = {
-                apiKey: ""AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
+                apiKey: "AIzaSyC7BJm6KVBRry8mmDd79rlhLvklPWSOhcM",
                 authDomain: "friendof3ci-dignity-provision.firebaseapp.com",
                 projectId: "friendof3ci-dignity-provision",
                 storageBucket: "friendof3ci-dignity-provision.appspot.com",
@@ -71,14 +76,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // RULE 1 Sanitization: Ensures path segments are clean
+        // Sanitization for safe paths
         const rawAppId = typeof __app_id !== 'undefined' ? __app_id : "friendof3ci-dignity-provision"; 
         const appId = rawAppId.replace(/[\/\.]/g, '_');
         
         const ACCESS_CODE = "3Ci";
         const TESTIMONIAL_EXPIRY_DAYS = 30;
 
-        // SAFE PATH HELPER: Follows mandatory path structure strictly
         const getDataCollection = (collectionName) => {
             return collection(db, 'artifacts', appId, 'public', 'data', collectionName);
         };
@@ -243,8 +247,8 @@
           return (
             <div className="space-y-6">
               <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl">
-                <h2 className="text-2xl font-black mb-1">My Provision Profile</h2>
-                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Bridging faith and opportunity</p>
+                <h2 className="text-2xl font-black mb-1">Candidate Profile</h2>
+                <p className="text-indigo-100 text-[10px] uppercase font-black tracking-widest">Share your skills and faith</p>
               </div>
 
               <form onSubmit={(e) => { e.preventDefault(); save(); }} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
@@ -262,7 +266,7 @@
                 </div>
 
                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Mode</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 block">Work Search Mode</label>
                     <div className="grid grid-cols-3 gap-2">
                         {['permanent', 'project', 'temporary'].map(type => (
                             <button type="button" key={type} onClick={() => setFormData({...formData, workType: type})} className={`p-4 rounded-2xl border text-[10px] font-black uppercase transition-all shadow-sm ${formData.workType === type ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{type}</button>
@@ -273,6 +277,7 @@
                 {formData.workType === 'temporary' && (
                     <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 space-y-4 animate-in zoom-in-95">
                         <div className="flex items-center gap-2 text-rose-700 font-black text-xs uppercase tracking-widest"><Icon name="Plus" size={14} /> Crisis Piece-Work Skills</div>
+                        <p className="text-[9px] text-rose-400 font-bold uppercase leading-tight">In desperate need? List 3 skills you can do for immediate income:</p>
                         <div className="grid grid-cols-1 gap-2">
                             {[0, 1, 2].map(i => (
                                 <input key={i} required={formData.workType === 'temporary'} className="w-full p-3 bg-white border border-rose-100 rounded-xl text-xs outline-none focus:ring-2 focus:ring-rose-500" placeholder={`Daily Skill ${i+1}`} value={formData.pieceWorkSkills[i]} onChange={e => {
@@ -299,7 +304,7 @@
         function EntrepreneurView({ candidates }) {
           const [searchTerm, setSearchTerm] = useState('');
           const active = candidates.filter(c => c.status === 'active');
-          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.skills?.toLowerCase().includes(searchTerm.toLowerCase()));
+          const filtered = active.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || (c.skills && c.skills.toLowerCase().includes(searchTerm.toLowerCase())));
 
           return (
             <div className="space-y-6 animate-in fade-in">
